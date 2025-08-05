@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  graylog-query-planner:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - GOOGLE_ADK_PROJECT_ID=${GOOGLE_ADK_PROJECT_ID}
+      - GOOGLE_ADK_LOCATION=${GOOGLE_ADK_LOCATION}
+      - GOOGLE_ADK_AGENT_ID=${GOOGLE_ADK_AGENT_ID}
+      - GOOGLE_AI_API_KEY=${GOOGLE_AI_API_KEY}
+      - GOOGLE_AI_MODEL=${GOOGLE_AI_MODEL}
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8000
+      - GRAYLOG_SERVER_URL=${GRAYLOG_SERVER_URL}
+      - GRAYLOG_API_TOKEN=${GRAYLOG_API_TOKEN}
+      - A2A_ENDPOINT=${A2A_ENDPOINT}
+      - A2A_SECRET_KEY=${A2A_SECRET_KEY}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - graylog-network
+
+networks:
+  graylog-network:
+    driver: bridge 

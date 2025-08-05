@@ -1,0 +1,14 @@
+google-generativeai>=0.3.0
+google-cloud-aiplatform>=1.35.0
+google-auth>=2.23.0
+google-auth-oauthlib>=1.0.0
+google-auth-httplib2>=0.1.0
+google-adk>=1.0.0
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.4.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+aiohttp>=3.8.0
+asyncio-mqtt>=0.13.0
+paho-mqtt>=1.6.1 

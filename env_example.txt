@@ -1,0 +1,20 @@
+GOOGLE_GENAI_USE_VERTEXAI=TRUE 
+GOOGLE_CLOUD_PROJECT=cloud-sre-poc-465509 
+GOOGLE_CLOUD_LOCATION=us-central1 
+GOOGLE_APPLICATION_CREDENTIALS=E:\Work\Cathay\議題\GrayLog告警\cloud-sre-poc-465509-a57d7aab386b.json
+GOOGLE_AI_MODEL=gemini-2.0-flash
+
+# Service Configuration
+SERVICE_HOST=0.0.0.0
+SERVICE_PORT=8000
+
+# Graylog Configuration
+GRAYLOG_SERVER_URL=http://localhost:9000
+GRAYLOG_API_TOKEN=your-graylog-api-token
+
+# A2A Communication Configuration
+A2A_ENDPOINT=/api/v1/a2a
+A2A_SECRET_KEY=your-secret-key
+
+# Logging Configuration
+LOG_LEVEL=INFO 
