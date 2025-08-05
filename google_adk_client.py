@@ -54,12 +54,22 @@ class GoogleADKClient:
             await self.session.close()
             self.session = None
     
+    def _convert_datetime(self, obj):
+        """遞迴將 dict/list 內所有 datetime 轉成 isoformat"""
+        if isinstance(obj, dict):
+            return {k: self._convert_datetime(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [self._convert_datetime(i) for i in obj]
+        elif isinstance(obj, datetime):
+            return obj.isoformat()
+        else:
+            return obj
+
     async def send_a2a_message(self, target_agent: str, message_type: str, 
                               payload: Dict[str, Any], correlation_id: Optional[str] = None) -> str:
         """發送A2A消息"""
         try:
             await self.start_session()
-            
             message = A2AMessage(
                 message_id=str(uuid.uuid4()),
                 source_agent=self.config.GOOGLE_ADK_AGENT_ID,
@@ -68,21 +78,15 @@ class GoogleADKClient:
                 payload=payload,
                 correlation_id=correlation_id
             )
-            
             # 構建請求URL
             url = f"{self.config.GRAYLOG_SERVER_URL}{self.config.A2A_ENDPOINT}"
-            
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.config.A2A_SECRET_KEY}",
                 "X-Agent-ID": self.config.GOOGLE_ADK_AGENT_ID
             }
-            
             message_dict = message.model_dump()
-            # 將所有 datetime 轉成 isoformat
-            for k, v in message_dict.items():
-                if isinstance(v, datetime):
-                    message_dict[k] = v.isoformat()
+            message_dict = self._convert_datetime(message_dict)
             async with self.session.post(url, json=message_dict, headers=headers) as response:
                 if response.status == 200:
                     result = await response.json()
@@ -92,7 +96,6 @@ class GoogleADKClient:
                     error_text = await response.text()
                     logger.error(f"A2A消息發送失敗: {response.status} - {error_text}")
                     raise Exception(f"A2A消息發送失敗: {response.status}")
-                    
         except Exception as e:
             logger.error(f"發送A2A消息時發生錯誤: {e}")
             raise

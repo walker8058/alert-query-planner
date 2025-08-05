@@ -91,6 +91,8 @@ class AIAnalyzer:
             "query": "具體的Graylog查詢語句",
             "purpose": "查詢目的",
             "time_range": "時間範圍（如：last 1 hour）",
+            "time_range_start": "根據告警時間列出開始查詢時間",
+            "time_range_end": "根據告警時間列出結束查詢時間",
             "expected_results": "期望的結果類型"
         }}
     ],
@@ -99,6 +101,7 @@ class AIAnalyzer:
     "success_probability": 0.0-1.0的成功概率
 }}
 請確保查詢策略是系統性的，從最可能的原因開始，逐步深入分析。
+回傳時以繁體中文回答。
 """
         return prompt
 

@@ -110,7 +110,7 @@ async def analyze_alert(request: AlertRequest):
             raise HTTPException(status_code=500, detail="AI分析器未初始化")
         
         # 使用AI分析告警
-        strategy = ai_analyzer.analyze_alert(request.alert)
+        strategy = await ai_analyzer.analyze_alert(request.alert)
         
         # 驗證策略
         if not ai_analyzer.validate_query_strategy(strategy):
@@ -139,7 +139,7 @@ async def create_query_plan(request: QueryPlanRequest):
         if not request.strategy:
             if not ai_analyzer:
                 raise HTTPException(status_code=500, detail="AI分析器未初始化")
-            request.strategy = ai_analyzer.analyze_alert(request.alert)
+            request.strategy = await ai_analyzer.analyze_alert(request.alert)
         
         # 創建查詢計劃
         plan = query_planner.create_query_plan(request.alert, request.strategy)
@@ -379,7 +379,7 @@ async def background_a2a_checker():
 @app.on_event("startup")
 async def start_background_tasks():
     """啟動背景任務"""
-    asyncio.create_task(background_a2a_checker())
+    # asyncio.create_task(background_a2a_checker())
 
 if __name__ == "__main__":
     uvicorn.run(
