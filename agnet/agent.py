@@ -23,6 +23,7 @@ root_agent = Agent(
         "priority": 1-5的優先級（1最高，5最低）, 
         "queries": [
             {{
+                "query_id": "查詢ID",
                 "description": "查詢描述",
                 "query": "具體的Graylog查詢語句",
                 "purpose": "查詢目的",
