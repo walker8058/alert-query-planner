@@ -1,9 +1,10 @@
 from google.adk.agents import Agent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
+from config import MODEL
 
 root_agent = Agent(
-    name="graylog_query_agent",
-    model="gemini-2.0-flash",
+    name="alert_query_planner",
+    model=MODEL,
     description="代理程式用於分析 Graylog 警示並產生查詢策略。",
     instruction=f"""
     你是一個專業的Graylog告警分析專家。請根據graylog告警信息，分析可能的問題原因並制定查詢策略。
@@ -33,11 +34,10 @@ root_agent = Agent(
                 "expected_results": "期望的結果"
             }},...
         ], 
-        "estimated_time": 預估執行時間（分鐘）, 
         "success_probability": 0.0-1.0的成功概率,
     }}
     """
 )
 
-a2a_app = to_a2a(root_agent)
+a2a_app = to_a2a(root_agent, port=8001)
 
