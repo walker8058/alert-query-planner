@@ -1,6 +1,9 @@
 from google.adk.agents import Agent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
-from config import MODEL
+from config import MODEL, check_required_envs, REQUIRED_ENV_VARS
+
+# 檢查必要環境變數，缺少則中止
+check_required_envs(REQUIRED_ENV_VARS)
 
 root_agent = Agent(
     name="alert_query_planner",
