@@ -1,0 +1,311 @@
+# GKE Autopilot 完整部署配置 - Alert Query Planner Agent
+# 適用於私有叢集環境
+
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ai-agent
+  labels:
+    name: ai-agent
+
+---
+# ConfigMap for environment variables
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alert-query-planner-config
+  namespace: ai-agent
+data:
+  GOOGLE_CLOUD_PROJECT: "cloud-sre-poc-465509"
+  GOOGLE_CLOUD_LOCATION: "asia-east1"
+  GOOGLE_GENAI_USE_VERTEXAI: "true"
+  KUBERNETES_NAMESPACE: "ai-agent"
+  A2A_DISCOVERY_MODE: "kubernetes"
+
+---
+# Service Account (使用 Workload Identity)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: alert-query-planner-sa
+  namespace: ai-agent
+  annotations:
+    iam.gke.io/gcp-service-account: "alert-query-planner-sa@cloud-sre-poc-465509.iam.gserviceaccount.com"
+
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alert-query-planner
+  namespace: ai-agent
+  labels:
+    app: alert-query-planner
+    version: v1
+    component: ai-agent
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: alert-query-planner
+  template:
+    metadata:
+      labels:
+        app: alert-query-planner
+        version: v1
+        component: ai-agent
+        role: ai-agent
+      annotations:
+        # GKE Autopilot 優化
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+    spec:
+      serviceAccountName: alert-query-planner-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+      - name: alert-query-planner
+        image: asia-east1-docker.pkg.dev/cloud-sre-poc-465509/app-image-repo/alert-query-planner:latest
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: alert-query-planner-config
+        env:
+        - name: GOOGLE_CLOUD_PROJECT
+          value: "cloud-sre-poc-465509"
+        - name: GOOGLE_CLOUD_LOCATION
+          value: "us-central1"
+        - name: GOOGLE_GENAI_USE_VERTEXAI
+          value: "true"
+        - name: PORT
+          value: "8080"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        # GKE Autopilot 資源配置
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+            ephemeral-storage: "1Gi"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+            ephemeral-storage: "2Gi"
+        # 健康檢查（使用 A2A Agent Card 端點）
+        livenessProbe:
+          httpGet:
+            path: /.well-known/agent-card.json
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /.well-known/agent-card.json
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+        startupProbe:
+          httpGet:
+            path: /.well-known/agent-card.json
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+          successThreshold: 1
+        # 安全上下文
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
+
+---
+# ClusterIP Service (內部通信)
+apiVersion: v1
+kind: Service
+metadata:
+  name: alert-query-planner-service
+  namespace: ai-agent
+  labels:
+    app: alert-query-planner
+    service: alert-query-planner
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: a2a-api
+  selector:
+    app: alert-query-planner
+
+---
+# LoadBalancer Service (外部存取，可選)
+apiVersion: v1
+kind: Service
+metadata:
+  name: alert-query-planner-lb
+  namespace: ai-agent
+  labels:
+    app: alert-query-planner
+    service: alert-query-planner-external
+  annotations:
+    # 使用 Terraform 創建的靜態 IP (如果需要)
+    # cloud.google.com/load-balancer-type: "External"
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: alert-query-planner
+
+---
+# HorizontalPodAutoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: alert-query-planner-hpa
+  namespace: ai-agent
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: alert-query-planner
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+
+---
+# NetworkPolicy (控制 Pod 間通信) - 優化版
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alert-query-planner-netpol
+  namespace: ai-agent
+spec:
+  podSelector:
+    matchLabels:
+      app: alert-query-planner
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # 允許有 ai-agent 標籤的 pods (不限 namespace)
+  - from:
+    - podSelector:
+        matchLabels:
+          role: ai-agent
+    ports:
+    - protocol: TCP
+      port: 8080
+  
+  # 允許來自 kube-system (健康檢查)
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 8080
+  
+  # 允許來自 LoadBalancer 和 Ingress
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 8080
+  egress:
+  # 允許 DNS 解析
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # 允許 HTTPS (Google APIs)
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  # 允許與其他 AI agent pods 通信
+  - to:
+    - podSelector:
+        matchLabels:
+          role: ai-agent
+    ports:
+    - protocol: TCP
+      port: 8080
+
+---
+# PodDisruptionBudget
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: alert-query-planner-pdb
+  namespace: ai-agent
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: alert-query-planner

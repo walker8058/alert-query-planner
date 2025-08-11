@@ -1,3 +1,4 @@
+import os
 from google.adk.agents import Agent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
 from config import MODEL, check_required_envs, REQUIRED_ENV_VARS
@@ -42,5 +43,9 @@ root_agent = Agent(
     """
 )
 
-a2a_app = to_a2a(root_agent, port=8080)
+# 創建 A2A 應用程式
+host = os.environ.get("A2A_HOST", "alert-query-planner-service")
+port = int(os.environ.get("PORT", 8080))
+a2a_app = to_a2a(root_agent, host=host,port=port)
+
 
