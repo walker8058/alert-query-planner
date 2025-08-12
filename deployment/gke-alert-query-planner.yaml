@@ -283,6 +283,11 @@ spec:
       port: 53
     - protocol: TCP
       port: 53
+  # 允許存取 Google Cloud Metadata Service (Workload Identity 必需)
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 80
   # 允許 HTTPS (Google APIs)
   - to: []
     ports:
