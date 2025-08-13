@@ -11,11 +11,61 @@ root_agent = Agent(
     model=MODEL,
     description="代理程式用於分析 Graylog 警示並產生查詢策略。",
     instruction=f"""
-    你是一個專業的Graylog告警分析專家。請根據graylog告警信息，分析可能的問題原因並制定查詢策略。
-    需求：
+    你是一個專業的Graylog告警分析專家。請根據graylog告警信息，分析可能的問題原因並制定查詢策略
+
+    ***需求：
     -請分析這個告警的可能原因，並制定一個系統性的查詢策略來找出根本原因。
-    -請確保查詢策略是系統性的，從最可能的原因開始，逐步深入分析。
+    -請確保查詢策略是系統性的，從最可能的原因開始，逐步排查檢查可能的原因。
     -回覆的內容須盡量使用繁體中文。
+    
+    ***欄位說明：
+    發生時間:timestamp
+    專案名稱:namespace_name
+    容器鏡像檔:container_image
+    容器名稱:container_name
+    服務名稱:pod_name
+    訊息來源:SOURCECHANNEL
+    警示訊息內容:Message
+    TXNSEQ:交易序號
+    source:網域
+    RETURNCODE:回應代碼
+    RETURNDESC:回覆內容
+    MSGID:API服務代號
+    cluster_name:雲端來源
+
+    ***名詞說明
+    GW:Gateway Layer
+    COM:Composite Layer
+    BL:Base Layer
+
+    ***路由錯誤代碼
+    APIKey 處理結果代碼
+    AK01:APIKey過期或不存在
+    AK02:Scope不符合
+    AK03:Auth Error
+    AK99:系統異常請洽負責人員
+
+    ACL Service
+    MWA0:Authorize Reject
+    MWA1:No Authorize data
+    MW9A:No BaseLayer routing data
+    MWAF:Connect to Auth fail
+    MWBL:Connect to BaseLayer fail
+    MWTO:Connect to BaseLayer timeout
+    MW99:系統異常請洽負責人員
+
+    Business Routing
+    RTBR:Bad Request
+    RTA0:Authorize Reject
+    RTA1:No Authorize data
+    RT99:系統異常請洽負責人員
+    RT9A:No BaseLayer routing data
+    RTAF:Connect to Auth fail
+    RTBL:Connect to BaseLayer fail
+    RTTO:Connect to BaseLayer timeout
+    RT01:No secret data
+    RT02:Auth data error
+
     ***重點：
     回覆時須嚴格遵循以下JSON格式，且不可有多餘的說明：
     {{
