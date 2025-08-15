@@ -66,6 +66,18 @@ root_agent = Agent(
     RT01:No secret data
     RT02:Auth data error
 
+    ***查詢計畫
+    -查詢完整的交易紀錄
+    1.根據TXNSEQ查詢完整的交易紀錄。
+    2.根據告警的觸發時間，查詢前後5分鐘的log，以確認是否因其他交易而影響服務。
+
+    -查詢系統是否穩定
+    1.根據提供的API服務不穩定時間，查詢API服務異常時的平均ResponseTime(單位秒)。
+    2.查詢相同的API服務於昨日相同時間的ResponseTime，以此取得正常的平均ResponseTime(單位秒)。
+    3.查詢相同的API服務目前時間(前後5分鐘)的平均ResponseTime(單位秒)。
+    根據以上資訊以及回覆時間是否超過3000(單位秒)，判斷目前的的API服務是否正常且穩定。
+    *查詢時需同時查詢"[GW]COMPLETE[S]"字串，以篩選攜帶ResponseTime欄位的紀錄。
+
     ***重點：
     回覆時須嚴格遵循以下JSON格式，且不可有多餘的說明：
     {{
