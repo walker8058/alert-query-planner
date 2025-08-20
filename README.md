@@ -39,19 +39,23 @@ alert-query-planner/
    ```
 
 2. **設定環境變數**
-   ```bash
-   # Windows PowerShell
-    GOOGLE_GENAI_USE_VERTEXAI=TRUE
-    GOOGLE_CLOUD_PROJECT=cloud-sre-poc-465509
-    GOOGLE_CLOUD_LOCATION=us-central1
-    GOOGLE_APPLICATION_CREDENTIALS=
-    MODEL="gemini-2.0-flash"
-   ```
+   GOOGLE_GENAI_USE_VERTEXAI=TRUE
+   GOOGLE_CLOUD_PROJECT=cloud-sre-poc-465509
+   GOOGLE_CLOUD_LOCATION=us-central1
+   GOOGLE_APPLICATION_CREDENTIALS=
+   MODEL=gemini-2.5-pro
+   A1_TIME_RANGE=last 20 minutes
+   A2_TIME_RANGE=last 10 minutes
+   A2A_HOST=127.0.0.1
+   A2A_PORT=8080
 
 3. **啟動服務**
    ```bash
    python -m uvicorn agent.agent:a2a_app --host 0.0.0.0 --port 8080
    ```
+
+4. **查看agent card**
+   http://127.0.0.1:8080/.well-known/agent-card.json
 
 ### Docker 部署
 
@@ -62,38 +66,31 @@ alert-query-planner/
 
 2. **運行容器**
    ```bash
-   docker run -d -p 8001:8001 -e MODEL=gemini-2.0-flash --name alert-query-planner alert-query-planner
+   docker run -d -p 8001:8001 -e MODEL=gemini-2.5-pro --name alert-query-planner alert-query-planner
    ```
 
 ## 📝 API 使用方式
 
 ### 輸入格式
-發生時間: 2025-08-11T06:20:16.771Z
-訊息大小: 1372
-雲類型: epaas
-專案名稱: midlxmsp01
-容器鏡像檔: parhnchar01.nc.aaa.intra.uwccb/midlxmsp01/msp-svc-businessrouting:20240918.1
-容器名稱: msp-svc-businessrouting
-服務名稱: msp-svc-businessrouting-5c68cb64c-fxhdp
-訊息來源: parhepaasocp4n11.aaa.intra.uwccb
-警示訊息內容:
-2025-08-11T06:20:16.760035927+00:00 stdout F 2025-08-11 14:20:16,759 INFO [executor-thread-484460hread] cub.msp.svc.businessrouting.process.OutputLogProcessor.loggerCompletedWithSpendTime(OutputLogProcessor.java:47) [ROUTING]COMPLETE[S][FNSCIF0064][MID-NT-STK-01][85051867787115816620][6531f06260094b198d97][MSP-C-FAVORTWDQ001][MW99][30043]
-
 {
-	"TRANRS": {
-		"MsgNo": "123654789",
-		"CycleNo": "123456789",
-		"TxnCode": "987654321"
-	},
-	"MWHEADER": {
-		"O360SEQ": "20030402962323565673",
-		"RETURNDESC": "Benkend Timeout!",
-		"TXNSEQ": "6531f06260094b198d97",
-		"RETURNCODE": "MW99",
-		"RETURNCODECHANNEL": "",
-		"SOURCECHANNEL": "MID-NT-STK-01",
-		"MSGID": "FNSCIF0064"
-	}
+  "event_id": "event-001",
+  "event_title": "Business Routing Alert",
+  "event_description": "msp-svc-businessrouting 服務發生警示事件",
+  "event_priority": "HIGH",
+  "event_timestamp": "2025-08-11T06:20:16.771Z",
+  "backlog": [
+    {
+      "發生時間": "2025-08-11T06:20:16.771Z",
+      "訊息大小": "1372",
+      "雲類型": "epaas",
+      "專案名稱": "midlxmsp01",
+      "容器鏡像檔": "parhnchar01.nc.aaa.intra.uwccb/midlxmsp01/msp-svc-businessrouting:20240918.1",
+      "容器名稱": "msp-svc-businessrouting",
+      "服務名稱": "msp-svc-businessrouting-5c68cb64c-fxhdp",
+      "訊息來源": "parhepaasocp4n11.aaa.intra.uwccb",
+      "警示訊息內容": "2025-08-11T06:20:16.760035927+00:00 stdout F 2025-08-11 14:20:16,759 INFO [executor-thread-484460hread] cub.msp.svc.businessrouting.process.OutputLogProcessor.loggerCompletedWithSpendTime(OutputLogProcessor.java:47) [ROUTING]COMPLETE[S][FNSCIF0064][MID-NT-STK-01][85051867787115816620][6531f06260094b198d97][MSP-C-FAVORTWDQ001][MW99][30043]{"TRANRS":{"MsgNo":"123654789","CycleNo":"123456789","TxnCode":"987654321"},"MWHEADER":{"O360SEQ":"20030402962323565673","RETURNDESC":"Benkend Timeout!","TXNSEQ":"6531f06260094b198d97","RETURNCODE":"MW99","RETURNCODECHANNEL":"","SOURCECHANNEL":"MID-NT-STK-01","MSGID":"FNSCIF0064"}}"
+    }
+  ]
 }
 
 ### 輸出格式

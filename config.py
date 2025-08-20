@@ -23,3 +23,5 @@ def check_env_ver(var_name, default=None, required=False):
     return value
 
 MODEL = check_env_ver("MODEL", "gemini-2.5-pro", required=False)
+A1_TIME_RANGE = check_env_ver("A1_TIME_RANGE", "last 10 minutes", required=False)
+A2_TIME_RANGE = check_env_ver("A2_TIME_RANGE", "last 10 minutes", required=False)
