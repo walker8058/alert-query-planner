@@ -5,11 +5,8 @@
 ## 🌟 主要功能
 
 - **智能警示分析**: 使用 Gemini 2.0 Flash 模型分析 Graylog 警示訊息
-- **自動查詢規劃**: 根據警示內容生成系統性的查詢策略
-- **產生查詢語法**: 根據查詢規劃產生查詢語法
-- **優先級評估**: 自動評估問題的優先級（1-5級）
+- **自動查詢規劃**: 根據警示內容選擇查詢策略
 - **時間範圍優化**: 智能計算查詢的時間範圍
-- **成功率預測**: 評估查詢策略的成功概率
 - **A2A 架構**: 支援 Agent-to-Agent 通訊協定
 
 ## 🏗️ 系統架構
@@ -18,7 +15,8 @@
 alert-query-planner/
 ├── agent/
 │   ├── __init__.py
-│   └── agent.py          # 主要代理程式邏輯
+│   ├── agent.py          # 主要代理程式邏輯
+│   └── time_tool.py      # 獲取目前時間
 ├── config.py             # 配置管理
 ├── requirements.txt      # Python 依賴
 ├── dockerfile           # Docker 配置
@@ -70,37 +68,33 @@ alert-query-planner/
 ## 📝 API 使用方式
 
 ### 輸入格式
-```json
+發生時間: 2025-08-11T06:20:16.771Z
+訊息大小: 1372
+雲類型: epaas
+專案名稱: midlxmsp01
+容器鏡像檔: parhnchar01.nc.aaa.intra.uwccb/midlxmsp01/msp-svc-businessrouting:20240918.1
+容器名稱: msp-svc-businessrouting
+服務名稱: msp-svc-businessrouting-5c68cb64c-fxhdp
+訊息來源: parhepaasocp4n11.aaa.intra.uwccb
+警示訊息內容:
+2025-08-11T06:20:16.760035927+00:00 stdout F 2025-08-11 14:20:16,759 INFO [executor-thread-484460hread] cub.msp.svc.businessrouting.process.OutputLogProcessor.loggerCompletedWithSpendTime(OutputLogProcessor.java:47) [ROUTING]COMPLETE[S][FNSCIF0064][MID-NT-STK-01][85051867787115816620][6531f06260094b198d97][MSP-C-FAVORTWDQ001][MW99][30043]
+
 {
-  "event_definition_id": "5f8d8c1013a7e34dc27db450",
-  "event_definition_type": "aggregation",
-  "event_title": "防火牆多次登入失敗告警",
-  "event_definition_description": "同一 IP 在 5 分鐘內登入失敗次數超過 10 次",
-  "job_definition_id": "5f8d8c1313a7e34dc27db451",
-  "event_id": "5f8d8c2313a7e34dc27db452",
-  "event_origin_context": "graylog",
-  "event_timestamp_processing": "2025-08-06T02:57:00.000Z",
-  "event_timerange_start": "2025-08-06T02:52:00.000Z",
-  "event_timerange_end": "2025-08-06T02:57:00.000Z",
-  "event_streams": "stream-id-1",
-  "event_source_streams": "firewall-logs-stream",
-  "event_alert": true,
-  "event_message": "IP 192.168.1.100 在 5 分鐘內登入失敗 12 次",
-  "event_source": "firewall01",
-  "event_key": "192.168.1.100",
-  "event_priority": 2,
-  "backlog": [
-    {
-      "id": "msgid-001",
-      "message": "登入失敗，使用者：admin，來源：192.168.1.100"
-    },
-    {
-      "id": "msgid-002",
-      "message": "登入失敗，使用者：admin，來源：192.168.1.100"
-    }
-  ]
+	"TRANRS": {
+		"MsgNo": "123654789",
+		"CycleNo": "123456789",
+		"TxnCode": "987654321"
+	},
+	"MWHEADER": {
+		"O360SEQ": "20030402962323565673",
+		"RETURNDESC": "Benkend Timeout!",
+		"TXNSEQ": "6531f06260094b198d97",
+		"RETURNCODE": "MW99",
+		"RETURNCODECHANNEL": "",
+		"SOURCECHANNEL": "MID-NT-STK-01",
+		"MSGID": "FNSCIF0064"
+	}
 }
-```
 
 ### 輸出格式
 

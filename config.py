@@ -22,4 +22,4 @@ def check_env_ver(var_name, default=None, required=False):
         raise ValueError(f"環境變數'{var_name}'未設定。")
     return value
 
-MODEL = check_env_ver("MODEL", "gemini-2.0-flash", required=False)
+MODEL = check_env_ver("MODEL", "gemini-2.5-pro", required=False)
