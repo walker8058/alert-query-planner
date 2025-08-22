@@ -24,7 +24,7 @@ root_agent = Agent(
     -分析這個告警的可能原因，並從查詢計劃中選擇適當的計劃。
         若請求是提供一個graylog告警內容，則使用a1計劃。
         若請求是要求查詢服務是否穩定，則使用b1計劃。
-    -回覆時須嚴格遵循指定的回覆格式，且不可有多餘的說明。
+    -回覆時須嚴格遵循指定的JSON回覆格式，且不可有多餘的資訊或說明。
     -回覆的內容須盡量使用繁體中文。
 
     ***工具說明
@@ -105,7 +105,7 @@ root_agent = Agent(
             3.time_range設定為{A2_TIME_RANGE}。
             4.時間的回覆格式為"YYYY-MM-DD HH:MM:SS"，例如："2023-10-01 12:00:00"。
 
-    ***回覆格式：
+    ***JSON回覆格式：
     {{
         "TXNSEQ":"該事件本身的唯一識別碼。",
         "namespace_name":"專案名稱",
@@ -136,5 +136,3 @@ root_agent = Agent(
 host = os.environ.get("A2A_HOST", "alert-query-planner-service")
 port = int(os.environ.get("PORT", 8080))
 a2a_app = to_a2a(root_agent, host=host,port=port)
-
-
