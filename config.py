@@ -6,6 +6,7 @@ REQUIRED_ENV_VARS = [
     "GOOGLE_GENAI_USE_VERTEXAI",
     "GOOGLE_CLOUD_PROJECT",
     "GOOGLE_CLOUD_LOCATION",
+    "CHROMA_PERSIST_DIRECTORY",
 ]
 
 def check_required_envs(required_vars: list[str] | None = None) -> dict[str, str]:
@@ -25,3 +26,4 @@ def check_env_ver(var_name, default=None, required=False):
 MODEL = check_env_ver("MODEL", "gemini-2.5-pro", required=False)
 A1_TIME_RANGE = check_env_ver("A1_TIME_RANGE", "last 10 minutes", required=False)
 A2_TIME_RANGE = check_env_ver("A2_TIME_RANGE", "last 10 minutes", required=False)
+CHROMA_PERSIST_DIRECTORY = check_env_ver("CHROMA_PERSIST_DIRECTORY", required=True)
