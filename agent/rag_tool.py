@@ -29,8 +29,8 @@ vector_store = Chroma(
 # 若向量庫為空，可初始化一些測試文件（正式環境請移除或改為動態管理）
 if not vector_store.get()["ids"]:
     docs = [
-        Document(page_content=a1, metadata={"source": "plans"}, id=1),
-        Document(page_content=b1, metadata={"source": "plans"}, id=2),
+        Document(page_content=a1, metadata={"source": "plans", "id":1}),
+        Document(page_content=b1, metadata={"source": "plans", "id":2}),
     ]
     uuids = [str(uuid4()) for _ in docs]
     vector_store.add_documents(documents=docs, ids=uuids)
